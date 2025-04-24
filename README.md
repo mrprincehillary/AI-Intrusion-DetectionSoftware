@@ -19,3 +19,5 @@ before network scan
 ![image](https://github.com/user-attachments/assets/e1e15b20-9ecd-4fee-946a-58bdb817605b)
 ![image](https://github.com/user-attachments/assets/9bfb9261-b4fe-4864-afb1-ab006a1dd0cb)
 
+# NOTE THE MODEL IS TOO LARGE COULD NOT BE UPLOADED HERE, 
+# TO GET IT EMAIL ME OR WHATSAPP ME
