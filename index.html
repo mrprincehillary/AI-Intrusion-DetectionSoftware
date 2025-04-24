@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Intrusion Detection System</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2c3e50;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --background-gradient: linear-gradient(135deg, #1a2a6c, #2a3c74, #3c4f7c);
+            --info-color: #3498db;
+            --warning-color: #f39c12;
+            --light-text: #f8f9fa;
+            --card-bg: rgba(255, 255, 255, 0.1);
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--background-gradient);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            width: 90%;
+            max-width: 800px;
+            gap: 20px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+        
+        .scan-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .scan-button:hover {
+            background: #45a049;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .scan-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .status-container {
+            margin-top: 20px;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        
+        .indicator-icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .scanning {
+            background: rgba(52, 152, 219, 0.2);
+            border-left: 4px solid #3498db;
+        }
+        
+        .success {
+            background: rgba(46, 204, 113, 0.2);
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .danger {
+            background: rgba(231, 76, 60, 0.2);
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        .result-container {
+            display: none;
+            margin-top: 20px;
+            border-radius: 8px;
+            padding: 15px;
+            font-weight: 500;
+        }
+        
+        .result-safe {
+            background-color: rgba(46, 204, 113, 0.2);
+            border: 1px solid var(--success-color);
+            color: #fff;
+        }
+        
+        .result-danger {
+            background-color: rgba(231, 76, 60, 0.2);
+            border: 1px solid var(--danger-color);
+            color: #fff;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .system-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                width: 95%;
+            }
+            
+            .system-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .system-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        .result-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            border-left: 5px solid var(--info-color);
+            display: none;
+        }
+        
+        .result-card.safe {
+            border-left-color: var(--success-color);
+        }
+        
+        .result-card.danger {
+            border-left-color: var(--danger-color);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result-timestamp {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .result-status {
+            font-size: 1.1rem;
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        
+        .status-safe {
+            background: rgba(46, 204, 113, 0.2);
+            color: var(--success-color);
+        }
+        
+        .status-danger {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger-color);
+        }
+        
+        .result-details {
+            margin-top: 15px;
+        }
+        
+        .detail-item {
+            display: flex;
+            margin-bottom: 8px;
+        }
+        
+        .detail-label {
+            width: 140px;
+            opacity: 0.7;
+        }
+        
+        .detail-value {
+            font-weight: 500;
+        }
+        
+        .result-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-button {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .action-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .action-button.primary {
+            background: var(--primary-color);
+            border-color: transparent;
+        }
+        
+        .action-button.primary:hover {
+            background: #45a049;
+        }
+        
+        .threat-type {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AI Intrusion Detection System</h1>
+        <p class="subtitle">Advanced network security monitoring</p>
+    </div>
+
+    <div class="dashboard">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-shield-alt"></i> Network Security Scanner</h2>
+                <button id="scanButton" class="scan-button" onclick="scan()">
+                    <i class="fas fa-search"></i> Start Scan
+                </button>
+            </div>
+            
+            <div class="status-container" id="statusContainer">
+                <!-- Status indicators will be inserted here by JavaScript -->
+            </div>
+            
+            <!-- Replace the simple result containers with the new result card -->
+            <div id="scanResultCard" class="result-card">
+                <div class="result-header">
+                    <div class="result-title">
+                        <i id="resultIcon" class="fas fa-info-circle"></i>
+                        <span id="resultTitle">Scan Results</span>
+                    </div>
+                    <div class="result-timestamp" id="resultTimestamp"></div>
+                </div>
+                
+                <div class="result-status" id="resultStatus"></div>
+                
+                <div class="result-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Scan ID:</div>
+                        <div class="detail-value" id="scanId"></div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Network Status:</div>
+                        <div class="detail-value" id="networkStatusDetail"></div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Duration:</div>
+                        <div class="detail-value" id="scanDuration">2.3 seconds</div>
+                    </div>
+                    <div class="detail-item" id="threatDetails" style="display: none;">
+                        <div class="detail-label">Threat Type:</div>
+                        <div class="detail-value">
+                            <span class="threat-type" id="threatType"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-actions">
+                    <button class="action-button primary" onclick="scan()">Scan Again</button>
+                    <button class="action-button" onclick="downloadReport()">Download Report</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-chart-line"></i> System Status</h2>
+            <div class="system-stats">
+                <div class="stat-card">
+                    <div class="stat-label">Scans Today</div>
+                    <div class="stat-value" id="scansCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Network Status</div>
+                    <div class="stat-value" id="networkStatus">Ready</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Protection Level</div>
+                    <div class="stat-value">Active</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Last Scan</div>
+                    <div class="stat-value" id="lastScan">--:--</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Track scan count and start time
+        let scanCount = 0;
+        let scanStartTime;
+        
+        function updateLastScanTime() {
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                              now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('lastScan').textContent = timeString;
+            return now;
+        }
+        
+        function formatTimestamp(date) {
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            return date.toLocaleDateString('en-US', options);
+        }
+        
+        function calculateScanDuration() {
+            const endTime = new Date();
+            const durationMs = endTime - scanStartTime;
+            return (durationMs / 1000).toFixed(1) + ' seconds';
+        }
+        
+        function generateScanId() {
+            return 'SCAN-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+        
+        function downloadReport() {
+            // Get current time for the filename
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0,10);
+            const timeStr = now.toTimeString().slice(0,8).replace(/:/g, '-');
+            const filename = `network-scan-report-${dateStr}-${timeStr}.json`;
+            
+            // Get scan results data
+            const reportData = {
+                scanId: document.getElementById('scanId').textContent,
+                timestamp: document.getElementById('resultTimestamp').textContent,
+                networkStatus: document.getElementById('networkStatusDetail').textContent,
+                scanDuration: document.getElementById('scanDuration').textContent,
+                threatDetected: document.getElementById('threatDetails').style.display !== 'none'
+            };
+            
+            // Create a download link
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reportData, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", filename);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            
+            // Optional: Make API call to record the download
+            fetch('/report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(reportData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to record report download');
+                }
+                return response.json();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        function scan() {
+            // Record scan start time
+            scanStartTime = new Date();
+            
+            // Reset and update UI
+            const statusContainer = document.getElementById('statusContainer');
+            const scanButton = document.getElementById('scanButton');
+            const resultCard = document.getElementById('scanResultCard');
+            
+            // Hide result card
+            resultCard.style.display = 'none';
+            resultCard.className = 'result-card';
+            
+            // Update button and status
+            scanButton.disabled = true;
+            scanButton.innerHTML = '<div class="spinner"></div> Scanning...';
+            document.getElementById('networkStatus').textContent = 'Scanning';
+            
+            // Show scanning status
+            statusContainer.innerHTML = `
+                <div class="status-indicator scanning">
+                    <i class="fas fa-sync fa-spin indicator-icon"></i>
+                    <span>AI IDS is scanning your network for intrusions...</span>
+                </div>
+            `;
+            
+            // Make the API call
+            fetch('/scan', { method: 'POST' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update scan count and timestamp
+                scanCount++;
+                document.getElementById('scansCount').textContent = scanCount;
+                const scanTime = updateLastScanTime();
+                
+                // Prepare the result card
+                document.getElementById('resultTimestamp').textContent = formatTimestamp(scanTime);
+                document.getElementById('scanId').textContent = generateScanId();
+                document.getElementById('scanDuration').textContent = calculateScanDuration();
+                
+                // Display result based on scan outcome
+                if (data.intrusion_detected) {
+                    // Update status container
+                    statusContainer.innerHTML = `
+                        <div class="status-indicator danger">
+                            <i class="fas fa-exclamation-circle indicator-icon"></i>
+                            <span>Scan complete! Potential security threats detected.</span>
+                        </div>
+                    `;
+                    
+                    // Update network status
+                    document.getElementById('networkStatus').textContent = 'At Risk';
+                    document.getElementById('networkStatusDetail').textContent = 'At Risk';
+                    
+                    // Configure result card for danger
+                    resultCard.className = 'result-card danger';
+                    document.getElementById('resultIcon').className = 'fas fa-exclamation-triangle';
+                    document.getElementById('resultTitle').textContent = 'Security Threat Detected';
+                    
+                    const resultStatus = document.getElementById('resultStatus');
+                    resultStatus.className = 'result-status status-danger';
+                    resultStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Intrusion Detected';
+                    
+                    // Show threat type
+                    document.getElementById('threatDetails').style.display = 'flex';
+                    document.getElementById('threatType').textContent = 'Suspicious Network Activity';
+                } else {
+                    // Update status container
+                    statusContainer.innerHTML = `
+                        <div class="status-indicator success">
+                            <i class="fas fa-check-circle indicator-icon"></i>
+                            <span>Scan complete! Your network appears to be secure.</span>
+                        </div>
+                    `;
+                    
+                    // Update network status
+                    document.getElementById('networkStatus').textContent = 'Secure';
+                    document.getElementById('networkStatusDetail').textContent = 'Secure';
+                    
+                    // Configure result card for safe status
+                    resultCard.className = 'result-card safe';
+                    document.getElementById('resultIcon').className = 'fas fa-check-circle';
+                    document.getElementById('resultTitle').textContent = 'Network Scan Complete';
+                    
+                    const resultStatus = document.getElementById('resultStatus');
+                    resultStatus.className = 'result-status status-safe';
+                    resultStatus.innerHTML = '<i class="fas fa-shield-alt"></i> No Threats Detected';
+                    
+                    // Hide threat type
+                    document.getElementById('threatDetails').style.display = 'none';
+                }
+                
+                // Show the result card
+                resultCard.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                statusContainer.innerHTML = `
+                    <div class="status-indicator danger">
+                        <i class="fas fa-times-circle indicator-icon"></i>
+                        <span>Error: Could not complete the scan. Please try again.</span>
+                    </div>
+                `;
+                document.getElementById('networkStatus').textContent = 'Error';
+                document.getElementById('networkStatusDetail').textContent = 'Error';
+            })
+            .finally(() => {
+                // Re-enable the scan button
+                scanButton.disabled = false;
+                scanButton.innerHTML = '<i class="fas fa-search"></i> Start Scan';
+            });
+        }
+    </script>
+</body>
+</html>
